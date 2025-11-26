@@ -1,0 +1,208 @@
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registrado:', reg))
+            .catch(err => console.log('Error al registrar SW:', err));
+    });
+}
+
+// Math PWA Application
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let totalAnswered = 0;
+let currentProblem = null;
+let difficulty = 'easy';
+
+function init() {
+    document.getElementById('root').innerHTML = `
+        <div style="min-height: 100vh; background: linear-gradient(to bottom right, #3B82F6, #8B5CF6, #EC4899); padding: 16px;">
+            <div style="max-width: 672px; margin: 0 auto;">
+                <div style="background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); padding: 24px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 40px;">🧠</span>
+                            <h1 style="font-size: 28px; font-weight: bold; color: #1F2937; margin: 0;">Matemáticas Divertidas</h1>
+                        </div>
+                        <button onclick="resetGame()" style="padding: 8px; background: transparent; border: none; cursor: pointer; border-radius: 9999px; transition: all 0.2s;" onmouseover="this.style.background='#F3F4F6'" onmouseout="this.style.background='transparent'" title="Reiniciar">
+                            🔄
+                        </button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                        <div style="background: linear-gradient(to bottom right, #FEF3C7, #FDE68A); padding: 16px; border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: bold; color: #92400E;" id="score">0</div>
+                            <div style="font-size: 14px; color: #B45309;">Puntos</div>
+                        </div>
+                        <div style="background: linear-gradient(to bottom right, #D1FAE5, #A7F3D0); padding: 16px; border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: bold; color: #065F46; display: flex; align-items: center; gap: 4px;">
+                                <span id="streak">0</span> ⭐
+                            </div>
+                            <div style="font-size: 14px; color: #047857;">Racha</div>
+                        </div>
+                        <div style="background: linear-gradient(to bottom right, #E9D5FF, #D8B4FE); padding: 16px; border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: bold; color: #6B21A8; display: flex; align-items: center; gap: 4px;">
+                                <span id="bestStreak">0</span> 🏆
+                            </div>
+                            <div style="font-size: 14px; color: #7C3AED;">Mejor Racha</div>
+                        </div>
+                        <div style="background: linear-gradient(to bottom right, #DBEAFE, #BFDBFE); padding: 16px; border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: bold; color: #1E40AF;" id="accuracy">0%</div>
+                            <div style="font-size: 14px; color: #2563EB;">Precisión</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); padding: 24px; margin-bottom: 16px;">
+                    <div style="font-size: 14px; font-weight: 600; color: #4B5563; margin-bottom: 12px;">Nivel de Dificultad:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="setDifficulty('easy')" id="btn-easy" style="flex: 1; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🟢 Fácil</button>
+                        <button onclick="setDifficulty('medium')" id="btn-medium" style="flex: 1; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🟡 Medio</button>
+                        <button onclick="setDifficulty('hard')" id="btn-hard" style="flex: 1; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🔴 Difícil</button>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); padding: 32px;" id="problemCard"></div>
+
+                <div style="text-align: center; margin-top: 24px; color: white; font-size: 14px;">
+                    <p>💡 Practica operaciones matemáticas básicas</p>
+                    <p style="margin-top: 4px;">Funciona offline · Instala como PWA</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    updateDifficultyButtons();
+    generateProblem();
+}
+
+function setDifficulty(level) {
+    difficulty = level;
+    updateDifficultyButtons();
+    generateProblem();
+}
+
+function updateDifficultyButtons() {
+    ['easy', 'medium', 'hard'].forEach(level => {
+        const btn = document.getElementById(`btn-${level}`);
+        if (difficulty === level) {
+            btn.style.background = 'linear-gradient(to right, #9333EA, #EC4899)';
+            btn.style.color = 'white';
+            btn.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)';
+        } else {
+            btn.style.background = '#F3F4F6';
+            btn.style.color = '#4B5563';
+            btn.style.boxShadow = 'none';
+        }
+    });
+}
+
+function generateProblem() {
+    const maxNum = difficulty === 'easy' ? 10 : difficulty === 'medium' ? 50 : 100;
+    const operators = ['+', '-', '×'];
+    if (difficulty !== 'easy') operators.push('÷');
+    
+    const operator = operators[Math.floor(Math.random() * operators.length)];
+    let num1, num2, answer;
+    
+    if (operator === '÷') {
+        num2 = Math.floor(Math.random() * 10) + 1;
+        answer = Math.floor(Math.random() * (maxNum / num2)) + 1;
+        num1 = num2 * answer;
+    } else {
+        num1 = Math.floor(Math.random() * maxNum) + 1;
+        num2 = Math.floor(Math.random() * maxNum) + 1;
+        
+        if (operator === '+') answer = num1 + num2;
+        else if (operator === '-') {
+            if (num2 > num1) [num1, num2] = [num2, num1];
+            answer = num1 - num2;
+        } else if (operator === '×') answer = num1 * num2;
+    }
+    
+    currentProblem = { num1, num2, operator, answer };
+    renderProblem();
+}
+
+function renderProblem() {
+    const operatorSymbol = currentProblem.operator === '×' ? '✕' : currentProblem.operator;
+    document.getElementById('problemCard').innerHTML = `
+        <div style="text-align: center; margin-bottom: 32px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 32px; flex-wrap: wrap;">
+                <div style="font-size: 56px; font-weight: bold; color: #1F2937;">${currentProblem.num1}</div>
+                <div style="font-size: 56px; color: #8B5CF6;">${operatorSymbol}</div>
+                <div style="font-size: 56px; font-weight: bold; color: #1F2937;">${currentProblem.num2}</div>
+                <div style="font-size: 56px; font-weight: bold; color: #9CA3AF;">=</div>
+                <div style="font-size: 56px; font-weight: bold; color: #8B5CF6;">?</div>
+            </div>
+            
+            <input type="number" id="answerInput" placeholder="?" style="width: 100%; max-width: 320px; font-size: 36px; font-weight: bold; text-align: center; padding: 16px; border: 4px solid #D8B4FE; border-radius: 12px; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#8B5CF6'" onblur="this.style.borderColor='#D8B4FE'" onkeypress="if(event.key==='Enter') checkAnswer()">
+        </div>
+
+        <button onclick="checkAnswer()" id="checkBtn" style="width: 100%; padding: 16px; background: linear-gradient(to right, #9333EA, #EC4899); color: white; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            Comprobar Respuesta
+        </button>
+        <div id="feedback"></div>
+    `;
+    document.getElementById('answerInput').focus();
+}
+
+function checkAnswer() {
+    const userAnswer = parseInt(document.getElementById('answerInput').value);
+    if (isNaN(userAnswer)) return;
+    
+    const isCorrect = userAnswer === currentProblem.answer;
+    totalAnswered++;
+    
+    if (isCorrect) {
+        score += 10;
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        
+        document.getElementById('feedback').innerHTML = `
+            <div style="background: #D1FAE5; border: 4px solid #10B981; border-radius: 12px; padding: 24px; text-align: center; margin-top: 16px; animation: bounce 0.5s;">
+                <div style="font-size: 64px; margin-bottom: 8px;">✅</div>
+                <div style="font-size: 24px; font-weight: bold; color: #065F46;">¡Correcto! 🎉</div>
+                <div style="color: #047857; margin-top: 8px;">+10 puntos</div>
+            </div>
+        `;
+        
+        setTimeout(() => generateProblem(), 1500);
+    } else {
+        streak = 0;
+        document.getElementById('feedback').innerHTML = `
+            <div style="background: #FEE2E2; border: 4px solid #EF4444; border-radius: 12px; padding: 24px; text-align: center; margin-top: 16px;">
+                <div style="font-size: 64px; margin-bottom: 8px;">❌</div>
+                <div style="font-size: 24px; font-weight: bold; color: #991B1B;">Incorrecto</div>
+                <div style="color: #DC2626; margin-top: 8px;">La respuesta correcta es: <span style="font-weight: bold;">${currentProblem.answer}</span></div>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').focus();
+        }, 2000);
+    }
+    
+    updateStats();
+}
+
+function updateStats() {
+    document.getElementById('score').textContent = score;
+    document.getElementById('streak').textContent = streak;
+    document.getElementById('bestStreak').textContent = bestStreak;
+    const accuracy = totalAnswered > 0 ? Math.round((score / (totalAnswered * 10)) * 100) : 0;
+    document.getElementById('accuracy').textContent = accuracy + '%';
+}
+
+function resetGame() {
+    score = 0;
+    streak = 0;
+    totalAnswered = 0;
+    updateStats();
+    generateProblem();
+}
+
+document.addEventListener('DOMContentLoaded', init);
