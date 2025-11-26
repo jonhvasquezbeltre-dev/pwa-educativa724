@@ -1,5 +1,8 @@
 [build]
+  base = "projects"
   publish = "."
+  command = "jekill build"
+  functions = "netlify/functions"
 
 [[redirects]]
   from = "/*"
@@ -13,3 +16,4 @@
 [[headers]]
   for = "/manifest.json"
   Content-Type = "application/manifest+json"
+
