@@ -1,15 +1,16 @@
 {
   "name": "Matemáticas Divertidas - PWA Educativa",
   "short_name": "Matemáticas",
-  "description": "Aplicación educativa para practicar operaciones matemáticas básicas",
-  "start_url": "/",
+  "description": "Aplicación educativa para practicar operaciones matemáticas básicas. Funciona offline.",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#8B5CF6",
   "theme_color": "#8B5CF6",
   "orientation": "portrait-primary",
+  "scope": "./",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "./icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -17,5 +18,6 @@
   ],
   "categories": ["education", "games"],
   "lang": "es",
-  "dir": "ltr"
+  "dir": "ltr",
+  "prefer_related_applications": false
 }
