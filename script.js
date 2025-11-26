@@ -1,7 +1,7 @@
 // Register Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('Service Worker registrado:', reg))
             .catch(err => console.log('Error al registrar SW:', err));
     });
@@ -20,17 +20,17 @@ function init() {
         <div style="min-height: 100vh; background: linear-gradient(to bottom right, #3B82F6, #8B5CF6, #EC4899); padding: 16px;">
             <div style="max-width: 672px; margin: 0 auto;">
                 <div style="background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); padding: 24px; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="font-size: 40px;">🧠</span>
                             <h1 style="font-size: 28px; font-weight: bold; color: #1F2937; margin: 0;">Matemáticas Divertidas</h1>
                         </div>
-                        <button onclick="resetGame()" style="padding: 8px; background: transparent; border: none; cursor: pointer; border-radius: 9999px; transition: all 0.2s;" onmouseover="this.style.background='#F3F4F6'" onmouseout="this.style.background='transparent'" title="Reiniciar">
+                        <button onclick="resetGame()" style="padding: 8px; background: transparent; border: none; cursor: pointer; border-radius: 9999px; transition: all 0.2s; font-size: 24px;" onmouseover="this.style.background='#F3F4F6'" onmouseout="this.style.background='transparent'" title="Reiniciar">
                             🔄
                         </button>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px;">
                         <div style="background: linear-gradient(to bottom right, #FEF3C7, #FDE68A); padding: 16px; border-radius: 12px;">
                             <div style="font-size: 24px; font-weight: bold; color: #92400E;" id="score">0</div>
                             <div style="font-size: 14px; color: #B45309;">Puntos</div>
@@ -56,18 +56,18 @@ function init() {
 
                 <div style="background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); padding: 24px; margin-bottom: 16px;">
                     <div style="font-size: 14px; font-weight: 600; color: #4B5563; margin-bottom: 12px;">Nivel de Dificultad:</div>
-                    <div style="display: flex; gap: 8px;">
-                        <button onclick="setDifficulty('easy')" id="btn-easy" style="flex: 1; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🟢 Fácil</button>
-                        <button onclick="setDifficulty('medium')" id="btn-medium" style="flex: 1; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🟡 Medio</button>
-                        <button onclick="setDifficulty('hard')" id="btn-hard" style="flex: 1; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🔴 Difícil</button>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="setDifficulty('easy')" id="btn-easy" style="flex: 1; min-width: 100px; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🟢 Fácil</button>
+                        <button onclick="setDifficulty('medium')" id="btn-medium" style="flex: 1; min-width: 100px; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🟡 Medio</button>
+                        <button onclick="setDifficulty('hard')" id="btn-hard" style="flex: 1; min-width: 100px; padding: 12px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;">🔴 Difícil</button>
                     </div>
                 </div>
 
                 <div style="background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); padding: 32px;" id="problemCard"></div>
 
                 <div style="text-align: center; margin-top: 24px; color: white; font-size: 14px;">
-                    <p>💡 Practica operaciones matemáticas básicas</p>
-                    <p style="margin-top: 4px;">Funciona offline · Instala como PWA</p>
+                    <p style="margin: 0;">💡 Practica operaciones matemáticas básicas</p>
+                    <p style="margin: 8px 0 0 0;">Funciona offline · Instala como PWA</p>
                 </div>
             </div>
         </div>
@@ -86,14 +86,16 @@ function setDifficulty(level) {
 function updateDifficultyButtons() {
     ['easy', 'medium', 'hard'].forEach(level => {
         const btn = document.getElementById(`btn-${level}`);
-        if (difficulty === level) {
-            btn.style.background = 'linear-gradient(to right, #9333EA, #EC4899)';
-            btn.style.color = 'white';
-            btn.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)';
-        } else {
-            btn.style.background = '#F3F4F6';
-            btn.style.color = '#4B5563';
-            btn.style.boxShadow = 'none';
+        if (btn) {
+            if (difficulty === level) {
+                btn.style.background = 'linear-gradient(to right, #9333EA, #EC4899)';
+                btn.style.color = 'white';
+                btn.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)';
+            } else {
+                btn.style.background = '#F3F4F6';
+                btn.style.color = '#4B5563';
+                btn.style.boxShadow = 'none';
+            }
         }
     });
 }
@@ -127,40 +129,50 @@ function generateProblem() {
 
 function renderProblem() {
     const operatorSymbol = currentProblem.operator === '×' ? '✕' : currentProblem.operator;
-    document.getElementById('problemCard').innerHTML = `
-        <div style="text-align: center; margin-bottom: 32px;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 32px; flex-wrap: wrap;">
-                <div style="font-size: 56px; font-weight: bold; color: #1F2937;">${currentProblem.num1}</div>
-                <div style="font-size: 56px; color: #8B5CF6;">${operatorSymbol}</div>
-                <div style="font-size: 56px; font-weight: bold; color: #1F2937;">${currentProblem.num2}</div>
-                <div style="font-size: 56px; font-weight: bold; color: #9CA3AF;">=</div>
-                <div style="font-size: 56px; font-weight: bold; color: #8B5CF6;">?</div>
+    const card = document.getElementById('problemCard');
+    if (card) {
+        card.innerHTML = `
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 32px; flex-wrap: wrap;">
+                    <div style="font-size: 48px; font-weight: bold; color: #1F2937;">${currentProblem.num1}</div>
+                    <div style="font-size: 48px; color: #8B5CF6;">${operatorSymbol}</div>
+                    <div style="font-size: 48px; font-weight: bold; color: #1F2937;">${currentProblem.num2}</div>
+                    <div style="font-size: 48px; font-weight: bold; color: #9CA3AF;">=</div>
+                    <div style="font-size: 48px; font-weight: bold; color: #8B5CF6;">?</div>
+                </div>
+                
+                <input type="number" id="answerInput" placeholder="?" style="width: 100%; max-width: 320px; font-size: 32px; font-weight: bold; text-align: center; padding: 16px; border: 4px solid #D8B4FE; border-radius: 12px; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#8B5CF6'" onblur="this.style.borderColor='#D8B4FE'" onkeypress="if(event.key==='Enter') checkAnswer()">
             </div>
-            
-            <input type="number" id="answerInput" placeholder="?" style="width: 100%; max-width: 320px; font-size: 36px; font-weight: bold; text-align: center; padding: 16px; border: 4px solid #D8B4FE; border-radius: 12px; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#8B5CF6'" onblur="this.style.borderColor='#D8B4FE'" onkeypress="if(event.key==='Enter') checkAnswer()">
-        </div>
 
-        <button onclick="checkAnswer()" id="checkBtn" style="width: 100%; padding: 16px; background: linear-gradient(to right, #9333EA, #EC4899); color: white; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            Comprobar Respuesta
-        </button>
-        <div id="feedback"></div>
-    `;
-    document.getElementById('answerInput').focus();
+            <button onclick="checkAnswer()" id="checkBtn" style="width: 100%; padding: 16px; background: linear-gradient(to right, #9333EA, #EC4899); color: white; font-size: 18px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                Comprobar Respuesta
+            </button>
+            <div id="feedback"></div>
+        `;
+        const input = document.getElementById('answerInput');
+        if (input) input.focus();
+    }
 }
 
 function checkAnswer() {
-    const userAnswer = parseInt(document.getElementById('answerInput').value);
+    const input = document.getElementById('answerInput');
+    if (!input) return;
+    
+    const userAnswer = parseInt(input.value);
     if (isNaN(userAnswer)) return;
     
     const isCorrect = userAnswer === currentProblem.answer;
     totalAnswered++;
+    
+    const feedback = document.getElementById('feedback');
+    if (!feedback) return;
     
     if (isCorrect) {
         score += 10;
         streak++;
         if (streak > bestStreak) bestStreak = streak;
         
-        document.getElementById('feedback').innerHTML = `
+        feedback.innerHTML = `
             <div style="background: #D1FAE5; border: 4px solid #10B981; border-radius: 12px; padding: 24px; text-align: center; margin-top: 16px; animation: bounce 0.5s;">
                 <div style="font-size: 64px; margin-bottom: 8px;">✅</div>
                 <div style="font-size: 24px; font-weight: bold; color: #065F46;">¡Correcto! 🎉</div>
@@ -171,7 +183,7 @@ function checkAnswer() {
         setTimeout(() => generateProblem(), 1500);
     } else {
         streak = 0;
-        document.getElementById('feedback').innerHTML = `
+        feedback.innerHTML = `
             <div style="background: #FEE2E2; border: 4px solid #EF4444; border-radius: 12px; padding: 24px; text-align: center; margin-top: 16px;">
                 <div style="font-size: 64px; margin-bottom: 8px;">❌</div>
                 <div style="font-size: 24px; font-weight: bold; color: #991B1B;">Incorrecto</div>
@@ -180,9 +192,9 @@ function checkAnswer() {
         `;
         
         setTimeout(() => {
-            document.getElementById('feedback').innerHTML = '';
-            document.getElementById('answerInput').value = '';
-            document.getElementById('answerInput').focus();
+            feedback.innerHTML = '';
+            input.value = '';
+            input.focus();
         }, 2000);
     }
     
@@ -190,11 +202,18 @@ function checkAnswer() {
 }
 
 function updateStats() {
-    document.getElementById('score').textContent = score;
-    document.getElementById('streak').textContent = streak;
-    document.getElementById('bestStreak').textContent = bestStreak;
-    const accuracy = totalAnswered > 0 ? Math.round((score / (totalAnswered * 10)) * 100) : 0;
-    document.getElementById('accuracy').textContent = accuracy + '%';
+    const scoreEl = document.getElementById('score');
+    const streakEl = document.getElementById('streak');
+    const bestStreakEl = document.getElementById('bestStreak');
+    const accuracyEl = document.getElementById('accuracy');
+    
+    if (scoreEl) scoreEl.textContent = score;
+    if (streakEl) streakEl.textContent = streak;
+    if (bestStreakEl) bestStreakEl.textContent = bestStreak;
+    if (accuracyEl) {
+        const accuracy = totalAnswered > 0 ? Math.round((score / (totalAnswered * 10)) * 100) : 0;
+        accuracyEl.textContent = accuracy + '%';
+    }
 }
 
 function resetGame() {
