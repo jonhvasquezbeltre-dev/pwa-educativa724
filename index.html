@@ -6,9 +6,9 @@
     <meta name="description" content="Aplicación educativa para practicar matemáticas - Funciona offline">
     <meta name="theme-color" content="#8B5CF6">
     <title>Matemáticas Divertidas - PWA Educativa</title>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="/icon.png">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -23,6 +23,10 @@
             min-height: 100vh;
             background: linear-gradient(to bottom right, #3B82F6, #8B5CF6, #EC4899);
         }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
@@ -34,6 +38,6 @@
             </div>
         </div>
     </div>
-    <script src="/script.js"></script>
+    <script src="./script.js"></script>
 </body>
 </html>
